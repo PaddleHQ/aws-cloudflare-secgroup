@@ -18,3 +18,11 @@ and is licensed under the MIT license - see the file script-license.txt
 The test cases are based on ones taken from Ansible and are licenced
 under the GPLv3.  Please see the file COPYING.
 
+
+N.B. Important BUG:
+
+This lambda does not properly clean out security groups of extraneous
+rules.  It's possible, for example, to leave in the default rule of a
+newly created security group.  It is recommended to either start with
+an empty security group or carefully check all the rules after
+running.
