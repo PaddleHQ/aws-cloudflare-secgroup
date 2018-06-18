@@ -53,6 +53,7 @@ def check_ipv6_rule_exists(rules, address, port):
     for rule in rules:
         for ip_range in rule['Ipv6Ranges']:
             if ip_range['CidrIpv6'] == address and rule['FromPort'] == port:
+                print("ip range already exists", ip_range)
                 return True
     return False
 
@@ -89,13 +90,16 @@ def delete_ipv6_rule(group, address, port):
 
 def lambda_handler(event, context):
     """ AWS Lambda main function """
-    ports = map(int, os.environ['PORTS_LIST'].split(","))
+    ports = [ int(x) for x in os.environ['PORTS_LIST'].split(",") ]
     if not ports:
         ports = [80]
 
     security_group = get_aws_security_group(os.environ['SECURITY_GROUP_ID'])
     current_rules = security_group.ip_permissions
     ip_addresses = get_cloudflare_ip_list()
+
+    print( "IP CIDRs from cloudflare: ", str(ip_addresses))
+    print( "ports: ", str(ports))
 
     ## IPv4
     # add new addresses
@@ -126,7 +130,6 @@ def lambda_handler(event, context):
             for ip_range in rule['Ipv6Ranges']:
                 if ip_range['CidrIpv6'] not in ip_addresses['ipv6_cidrs'] and port == ip_range['FromPort']:
                     delete_ipv6_rule(security_group, ip_range['CidrIpv6'], port)
-
 
 def main():
     print("calling lambda_handler with empty event")

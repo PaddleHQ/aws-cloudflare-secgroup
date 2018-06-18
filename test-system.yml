@@ -95,6 +95,7 @@
             handler: "{{lambda_handler}}"
             role: "arn:aws:iam::455225740156:role/service-role/basicLambdaRole"
             zip_file: "{{zip_res.dest}}"
+            timeout: 90
             environment_variables:
               PORTS_LIST: 80,443
               SECURITY_GROUP_ID: "{{ group_create.group_id }}"
@@ -119,14 +120,19 @@
               group-name: "{{ security_group_name }}"
           register: group_res
 
-        - name: check that some cloudflare addresses are there
+        - name: check that some cloudflare addresses are there and we have the right group
           assert:
             that:
-              - "'108.162.192.0/18' in {{group_res}}"
-              - "'0.0.0.0' not in {{group_res}}"
-              - "{{ security_group_name }} in {{group_res}}"
+              - "'108.162.192.0/18' in {{group_res | to_json | quote}}"
+              - "'{{ security_group_name }}' in {{group_res | to_json | quote}}"
             msg: "failed to create security group"
             
+        - name: check that we clean out wrong rules
+          assert:
+            that:
+              - "'0.0.0.0' not in {{group_res | to_json | quote}}"
+            msg: "failed to create security group"
+
     - always:
 
       # ============================================================
