@@ -18,7 +18,7 @@
   vars:
     lambda_name: cf-security-group-update
     lambda_function_name: cf-security-group-update-test
-    lambda_handler: "{{lambda_name}}.handler"
+    lambda_handler: "{{lambda_name}}.lambda_handler"
     security_group_name: cloudflare_lambda_test_sg
     output_dir: ~/ansible_testing
 
@@ -44,6 +44,14 @@
             name: "{{ security_group_name }}"
             state: absent
             <<: *aws_connection_info
+
+        - name: create security group recording id
+          ec2_group:
+            name: "{{ security_group_name }}"
+            state: present
+            description: security group for testing cloudflare ip lambda
+            <<: *aws_connection_info
+          register: group_create
 
     # And that we have a lambda installed
 
@@ -87,6 +95,9 @@
             handler: "{{lambda_handler}}"
             role: "arn:aws:iam::455225740156:role/service-role/basicLambdaRole"
             zip_file: "{{zip_res.dest}}"
+            environment_variables:
+              PORTS_LIST: 80,443
+              SECURITY_GROUP_ID: "{{ group_create.group_id }}"
             <<: *aws_connection_info
           register: lambda_result
 
@@ -112,7 +123,7 @@
           assert:
             that:
               - "108.162.192.0/18 in {{group_res}}"
-              - "{{ security_group_name in {{group_res}}"
+              - "{{ security_group_name }} in {{group_res}}"
             msg: "failed to create security group"
             
     - always:

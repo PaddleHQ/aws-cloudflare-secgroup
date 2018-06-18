@@ -30,7 +30,7 @@ def check_rule_exists(rules, address, port):
 def add_rule(group, address, port):
     'Add the ip address/port to the security group'
     group.authorize_ingress(IpProtocol="tcp", CidrIp=address, FromPort=port, ToPort=port)
-    print "Added %s : %i  " % (address, port)
+    print( "Added %s : %i  " % (address, port) )
 
 def lambda_handler(event, context):
     'aws lambda main func'
