@@ -42,7 +42,20 @@ def lambda_handler(event, context):
     current_rules = security_group.ip_permissions
     ip_addresses = get_cloudflare_ip_list()
 
+    print ("ip_ranges: " + str(ip_addresses))
+
+
     for ip_address in ip_addresses:
         for port in ports:
             if not check_rule_exists(current_rules, ip_address, port):
                 add_rule(security_group, ip_address, port)
+
+
+def main():
+    print("calling lambda_handler with empty event")
+    lambda_handler(None,None)
+    print("finished calling lambda_handler")
+
+
+if __name__ == '__main__':
+    main()

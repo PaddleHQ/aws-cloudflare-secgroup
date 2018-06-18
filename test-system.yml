@@ -122,7 +122,8 @@
         - name: check that some cloudflare addresses are there
           assert:
             that:
-              - "108.162.192.0/18 in {{group_res}}"
+              - "'108.162.192.0/18' in {{group_res}}"
+              - "'0.0.0.0' not in {{group_res}}"
               - "{{ security_group_name }} in {{group_res}}"
             msg: "failed to create security group"
             
