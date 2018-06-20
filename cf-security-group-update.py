@@ -106,7 +106,7 @@ def delete_port_completely(group, to_port, from_port):
 # FIXME - this revoke_ingress seems to be ignored!!!!!
 def delete_protocol_completely(group, protocol):
     """ Remove the IP address/port from the security group """
-    group.revoke_ingress(IpProtocol=protocol)
+    group.revoke_ingress(IpPermissions=[{'IpProtocol': protocol}])
     print("Removed rules for protocol : %s  " % (protocol))
 
 
@@ -154,8 +154,11 @@ def lambda_handler(event, context):
     for port in ports:
         for rule in current_rules:
             for ip_range in rule['Ipv6Ranges']:
-                if ip_range['CidrIpv6'] not in ip_addresses['ipv6_cidrs'] and port == ip_range['FromPort']:
-                    delete_ipv6_rule(security_group, ip_range['CidrIpv6'], port)
+                try:
+                    if ip_range['CidrIpv6'] not in ip_addresses['ipv6_cidrs'] and port == ip_range['FromPort']:
+                        delete_ipv6_rule(security_group, ip_range['CidrIpv6'], port)
+                except KeyError:
+                    pass
 
 
     # remove extraneous rules
