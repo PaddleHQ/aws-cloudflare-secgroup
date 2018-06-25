@@ -8,6 +8,8 @@ python:
 branches:
   only:
     - unreviewed
+    - unreviewed2
+    - devel
 
 build:
   # pre_ci_boot:
@@ -16,10 +18,15 @@ build:
   #   pull: true
 
   ci:
-    - sudo apt-get install python3-pip shellcheck
+    - sudo apt-get install python3-pip shellcheck ansible
     - pip3 install -r ci-requirements.txt
     # - sudo yum -y install zip pip3
     - "./lint-all-the-files.sh"
+    # - "export AWS_ACCESS_KEY_ID=$(shipctl get_integration_resource_field aws_iam accessKey)"
+    # - "export AWS_SECRET_ACCESS_KEY=$(shipctl get_integration_resource_field aws_iam secretKey)"
+    - "cp aws_credentials.shippable_template aws_credentials.yml"
+    # - "shipctl replace aws_credentials.yml"
+    - "ansible-playbook -vvvvv test-system.yml -i localhost,"
     - "echo success"
     - "true"
     # - mkdir -p buildp
@@ -30,7 +37,10 @@ build:
 #     # - ansible-playbook update_lambdas.yml
 #     # - pip install -r requirements.txt
 #     - aws lambda update-function-code --function-name CloseUsers --region us-east-2 --zip-file fileb://deploy.zip
-# integrations:
+integrations:
+  deploy:
+    - integrationName: aws_mdd
+      type: aws
 #   hub:
 #     - integrationName: ecr_keys   ##replace with your integration name
 #       type: ecr

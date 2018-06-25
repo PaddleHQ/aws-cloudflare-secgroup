@@ -16,6 +16,7 @@
   vars_files:
     - aws_credentials.yml
   vars:
+    ansible_connection: local
     lambda_name: cf-security-group-update
     lambda_function_name: cf-security-group-update-test
     lambda_handler: "{{lambda_name}}.lambda_handler"
