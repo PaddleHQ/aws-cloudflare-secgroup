@@ -11,10 +11,12 @@ build:
   #   pull: true
 
   ci:
+    - sudo yum -y install pip3 shellcheck
+    - pip install -r ci-requirements.txt
+    # - sudo yum -y install zip pip3
     - "./lint-all-the-files.sh"
     - "echo success"
     - "true"
-    # - sudo yum -y install zip pip3
     # - mkdir -p buildp
     # - python3 -m venv build/lambda_venv/
     # - source build/lambda_venv/bin/activate
