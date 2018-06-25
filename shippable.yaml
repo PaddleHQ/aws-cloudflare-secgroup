@@ -11,6 +11,7 @@ build:
   #   pull: true
 
   ci:
+    - "./lint-all-the-files.sh"
     - "echo success"
     - "true"
     # - sudo yum -y install zip pip3
@@ -29,3 +30,4 @@ build:
 #   deploy:
 #     - integrationName: aws_keys
 #       type: aws
+o
