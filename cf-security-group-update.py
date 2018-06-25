@@ -112,7 +112,7 @@ def delete_protocol_completely(group, protocol):
 
 def lambda_handler(event, context):
     """ AWS Lambda main function """
-    ports = [ int(x) for x in os.environ['PORTS_LIST'].split(",") ]
+    ports = [int(x) for x in os.environ['PORTS_LIST'].split(",")]
     if not ports:
         ports = [80]
 
@@ -120,11 +120,10 @@ def lambda_handler(event, context):
     current_rules = security_group.ip_permissions
     ip_addresses = get_cloudflare_ip_list()
 
-    print( "IP CIDRs from cloudflare: ", str(ip_addresses))
-    print( "ports: ", str(ports))
+    print("IP CIDRs from cloudflare: ", str(ip_addresses))
+    print("ports: ", str(ports))
 
-    ## IPv4
-    # add new addresses
+    # IPv4 - add new addresses
     for ipv4_cidr in ip_addresses['ipv4_cidrs']:
         for port in ports:
             if not check_ipv4_rule_exists(current_rules, ipv4_cidr, port):
@@ -143,7 +142,7 @@ def lambda_handler(event, context):
                 if ip_range['CidrIp'] not in ip_addresses['ipv4_cidrs']:
                     delete_ipv4_rule(security_group, ip_range['CidrIp'], port)
 
-    ## IPv6 -- because of boto3 syntax, this has to be separate
+    # IPv6 -- because of boto3 syntax, this has to be separate
     # add new addresses
     for ipv6_cidr in ip_addresses['ipv6_cidrs']:
         for port in ports:
@@ -160,14 +159,13 @@ def lambda_handler(event, context):
                 except KeyError:
                     pass
 
-
     # remove extraneous rules
     for rule in current_rules:
         if rule['IpProtocol'] != 'tcp':
             delete_protocol_completely(security_group, rule['IpProtocol'])
             continue
         try:
-            if rule['ToPort'] in ports and rule['FromPort'] == rule['ToPort'] :
+            if rule['ToPort'] in ports and rule['FromPort'] == rule['ToPort']:
                 continue
         except KeyError:
             continue
@@ -176,7 +174,7 @@ def lambda_handler(event, context):
 
 def main():
     print("calling lambda_handler with empty event")
-    lambda_handler(None,None)
+    lambda_handler(None, None)
     print("finished calling lambda_handler")
 
 

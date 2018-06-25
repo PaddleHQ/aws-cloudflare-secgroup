@@ -8,22 +8,22 @@
 # This file is licensed under the AGPLv3
 find . -type f | ( 
     failcount=0
-    substatus=0
+    # substatus=0
     while read -r file
     do
 	case "$file" in
 	    *.py)
 		flake8 --ignore=W503,E402,E501 "$file" && ! grep 'pdb.set_trace\|FIXME' "$file" ;;
 	    *.yaml | *.yml )
-		yamllint "$file" ;;
+		yamllint --format parsable "$file" ;;
 	    *.sh)
-		shellcheck "$file"
+		shellcheck -f gcc "$file"
 	esac
 	newstat=$?
 	if [[ "$newstat" -gt "$status" ]]
 	then
 	    ((failcount++))
-	    substatus=$newstat
+	#    substatus=$newstat
 	fi
     done
     exit $failcount )
@@ -33,5 +33,5 @@ status=$?
 if [[ "$status" -gt 0 ]]
 then
     echo "linting failed on $status files" 
-    exit $1
+    exit 1
 fi
