@@ -1,15 +1,15 @@
 ---
 #
 #  This is based on the lambda and lambda policy testcases out of Ansible's integration tests
-#  
+#
 #  As such it is licensed under the GPLv3 with copyright belonging to various including:
-#  
+#
 #  * Michael De La Rue
 #  * William Thames
 #  * The Ansible Project
-#  
-#  Further work on this done as paid work by Michael De La Rue for paddle.com. 
-#  
+#
+#  Further work on this done as paid work by Michael De La Rue for paddle.com.
+#
 
 
 - hosts: localhost
@@ -22,8 +22,7 @@
     security_group_name: cloudflare_lambda_test_sg
     output_dir: ~/ansible_testing
 
-# Precondition: set up AWS paramerers
-
+  # Precondition: set up AWS paramerers
   tasks:
     - block:
         - name: set up AWS credentials
@@ -33,7 +32,7 @@
               aws_access_key: '{{ aws_access_key }}'
               aws_secret_key: '{{ aws_secret_key }}'
               security_token: '{{ security_token }}'
-          no_log: yes
+          no_log: true
 
 
     # Given that the security group for cloudflare addresses is empty
@@ -53,7 +52,7 @@
             <<: *aws_connection_info
           register: group_create
 
-    # And that we have a lambda installed
+        # And that we have a lambda installed
 
         # ============================================================
         # direct zip file upload
@@ -72,7 +71,8 @@
         # This should exist, but there's no expectation that the test user should be able to
         # create/update this role, merely validate that it's there.
         # Use ansible -m iam_role -a 'name=ansible_lambda_role
-        # assume_role_policy_document={{ lookup("file", "test/integration/targets/lambda_policy/files/minimal_trust_policy.json", convert_data=False) }}
+        # assume_role_policy_document={{ lookup("file", "test/integration/targets/lambda_policy/files/minimal_trust_policy.json", \
+        #        convert_data=False) }}
         # ' -vvv localhost
         # to create this through more privileged credentials before running this test suite.
         # - name: create minimal lambda role
@@ -126,8 +126,7 @@
               - "'108.162.192.0/18' in {{group_res | to_json | quote}}"
               - "'{{ security_group_name }}' in {{group_res | to_json | quote}}"
             msg: "failed to create security group"
-            
-        
+
         # FIXME: this doesn't work because boto3 fails to remove all of a protocol
         # need to check with AWS what the actual command should be.
 
@@ -140,16 +139,16 @@
     - always:
 
       # ============================================================
-      - name: destroy lambda for test cleanup if created
-        lambda:
-          name: "{{lambda_function_name}}"
-          <<: *aws_connection_info
-          state: absent
-        register: result
-        ignore_errors: yes
+        - name: destroy lambda for test cleanup if created
+          lambda:
+            name: "{{lambda_function_name}}"
+            <<: *aws_connection_info
+            state: absent
+          register: result
+          ignore_errors: true
 
-      - name: delete security group if present
-        ec2_group:
-          name: "{{ security_group_name }}"
-          <<: *aws_connection_info
-          state: absent
+        - name: delete security group if present
+          ec2_group:
+            name: "{{ security_group_name }}"
+            <<: *aws_connection_info
+            state: absent
