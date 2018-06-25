@@ -4,6 +4,11 @@ language: python
 python:
   - 3.6
 
+
+branches:
+  only:
+    - unreviewed
+
 build:
   # pre_ci_boot:
   #   image_name: 659542948624.dkr.ecr.us-east-1.amazonaws.com/python-lambda-shippable-image
@@ -11,8 +16,8 @@ build:
   #   pull: true
 
   ci:
-    - sudo yum -y install pip3 shellcheck
-    - pip install -r ci-requirements.txt
+    - sudo apt-get install python3-pip shellcheck
+    - pip3 install -r ci-requirements.txt
     # - sudo yum -y install zip pip3
     - "./lint-all-the-files.sh"
     - "echo success"
