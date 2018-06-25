@@ -13,7 +13,7 @@ find . -type f | (
     do
 	case "$file" in
 	    *.py)
-		flake8 --ignore=W503,E402,E501 "$file" && ! grep 'pdb.set_trace\|FIXME' "$file" ;;
+		flake8 --ignore=W503,E402,E501 "$file" && ! grep --with-filename --line-number 'pdb.set_trace\|FIXME' "$file" ;;
 	    *.yaml | *.yml )
 		yamllint --format parsable "$file" ;;
 	    *.sh)
