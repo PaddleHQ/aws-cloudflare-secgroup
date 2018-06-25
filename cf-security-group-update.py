@@ -103,7 +103,7 @@ def delete_port_completely(group, to_port, from_port):
     print("Removed rules to port %i from port %i " % (to_port, from_port))
 
 
-# FIXME - this revoke_ingress seems to be ignored!!!!!
+# BUG - this revoke_ingress seems to be ignored!!!!!
 def delete_protocol_completely(group, protocol):
     """ Remove the IP address/port from the security group """
     group.revoke_ingress(IpPermissions=[{'IpProtocol': protocol}])
