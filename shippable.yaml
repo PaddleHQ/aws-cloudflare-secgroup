@@ -11,8 +11,8 @@ build:
   #   pull: true
 
   ci:
-    - echo success
-    - true
+    - "echo success"
+    - "true"
     # - sudo yum -y install zip pip3
     # - mkdir -p buildp
     # - python3 -m venv build/lambda_venv/
