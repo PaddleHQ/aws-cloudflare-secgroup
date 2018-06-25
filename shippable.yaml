@@ -1,0 +1,31 @@
+---
+language: python
+
+python:
+  - 3.6
+
+build:
+  # pre_ci_boot:
+  #   image_name: 659542948624.dkr.ecr.us-east-1.amazonaws.com/python-lambda-shippable-image
+  #   image_tag: latest
+  #   pull: true
+
+  ci:
+    - echo success
+    - true
+    # - sudo yum -y install zip pip3
+    # - mkdir -p buildp
+    # - python3 -m venv build/lambda_venv/
+    # - source build/lambda_venv/bin/activate
+
+#   post_ci:
+#     # - ansible-playbook update_lambdas.yml
+#     # - pip install -r requirements.txt
+#     - aws lambda update-function-code --function-name CloseUsers --region us-east-2 --zip-file fileb://deploy.zip
+# integrations:
+#   hub:
+#     - integrationName: ecr_keys   ##replace with your integration name
+#       type: ecr
+#   deploy:
+#     - integrationName: aws_keys
+#       type: aws
