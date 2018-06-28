@@ -4,7 +4,6 @@ language: python
 python:
   - 3.6
 
-
 branches:
   only:
     - unreviewed
@@ -12,38 +11,34 @@ branches:
     - devel
 
 build:
-  # pre_ci_boot:
-  #   image_name: 659542948624.dkr.ecr.us-east-1.amazonaws.com/python-lambda-shippable-image
-  #   image_tag: latest
-  #   pull: true
-
   ci:
     - sudo apt-get install python3-pip shellcheck ansible
     - pip3 install -r ci-requirements.txt
-    # - sudo yum -y install zip pip3
     - "./lint-all-the-files.sh"
-    # - "export AWS_ACCESS_KEY_ID=$(shipctl get_integration_resource_field aws_iam accessKey)"
-    # - "export AWS_SECRET_ACCESS_KEY=$(shipctl get_integration_resource_field aws_iam secretKey)"
-    - "cp aws_credentials.shippable_template aws_credentials.yml"
-    # - "shipctl replace aws_credentials.yml"
-    - "ansible-playbook -vvvvv test-system.yml -i localhost,"
+    - "shipctl get_integration_resource_field aws_mdd accessKey"
+    - "shipctl get_resource_env aws_mdd DEMO"
     - "echo success"
     - "true"
-    # - mkdir -p buildp
-    # - python3 -m venv build/lambda_venv/
-    # - source build/lambda_venv/bin/activate
+    - "export AWS_ACCESS_KEY_ID=$(shipctl get_integration_resource_field aws_mdd accessKey)"
+    - "export AWS_SECRET_ACCESS_KEY=$(shipctl get_integration_resource_field aws_mdd secretKey)"
+    - "cp aws_credentials.shippable_template aws_credentials.yml"
+    - "ansible-playbook -vvvvv test-system.yml -i localhost,"
 
-#   post_ci:
-#     # - ansible-playbook update_lambdas.yml
-#     # - pip install -r requirements.txt
-#     - aws lambda update-function-code --function-name CloseUsers --region us-east-2 --zip-file fileb://deploy.zip
-integrations:
-  deploy:
-    - integrationName: aws_mdd
-      type: aws
-#   hub:
-#     - integrationName: ecr_keys   ##replace with your integration name
-#       type: ecr
-#   deploy:
-#     - integrationName: aws_keys
-#       type: aws
+resources:
+  - name: aws_mdd
+    type: integration
+    integration: aws_mdd
+
+  - name: thegit
+    type: gitRepo
+    integration: github
+    versionTemplate:
+      sourceName: PaddleHQ/aws-cloudflare-secgroup
+
+jobs:
+  - name: aws-cloudflare-secgroup_runCI
+    type: runCI
+    steps:
+      - IN: aws_mdd
+        switch: false
+      - IN: thegit
