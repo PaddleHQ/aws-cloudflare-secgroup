@@ -53,6 +53,12 @@
             <<: *aws_connection_info
           register: group_create
 
+        - name: ensure that output dir exists
+          file:
+            path: "{{output_dir}}"
+            state: directory
+            mode: 0775
+
         # And that we have a lambda installed
 
         # ============================================================
@@ -119,6 +125,7 @@
         - ec2_group_facts:
             filters:
               group-name: "{{ security_group_name }}"
+            <<: *aws_connection_info
           register: group_res
 
         - name: check that some cloudflare addresses are there and we have the right group
