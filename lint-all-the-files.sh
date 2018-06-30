@@ -12,8 +12,12 @@ find . -type f | (
     while read -r file
     do
 	case "$file" in
+	    ./features/steps/*.py)
+		flake8 --ignore=W503,E402,E501,F811 "$file" --builtins=given,when,then &&
+		    ! grep --with-filename --line-number 'pdb.set_trace\|FIXME' "$file" ;;
 	    *.py)
-		flake8 --ignore=W503,E402,E501 "$file" && ! grep --with-filename --line-number 'pdb.set_trace\|FIXME' "$file" ;;
+		flake8 --ignore=W503,E402,E501 "$file" &&
+		    ! grep --with-filename --line-number 'pdb.set_trace\|FIXME' "$file" ;;
 	    *.yaml | *.yml )
 		yamllint --format parsable "$file" ;;
 	    *.sh)
