@@ -78,7 +78,8 @@
         # This should exist, but there's no expectation that the test user should be able to
         # create/update this role, merely validate that it's there.
         # Use ansible -m iam_role -a 'name=ansible_lambda_role
-        # assume_role_policy_document={{ lookup("file", "test/integration/targets/lambda_policy/files/minimal_trust_policy.json", \
+        # assume_role_policy_document={{ lookup("file",
+        # "test/integration/targets/lambda_policy/files/minimal_trust_policy.json", \
         #        convert_data=False) }}
         # ' -vvv localhost
         # to create this through more privileged credentials before running this test suite.
@@ -146,7 +147,8 @@
 
     - always:
 
-      # ============================================================
+        # ============================================================
+
         - name: destroy lambda for test cleanup if created
           lambda:
             name: "{{lambda_function_name}}"
