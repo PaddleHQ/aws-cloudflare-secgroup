@@ -6,7 +6,7 @@
 # copyright Michael De La Rue (c) 2018  - paid work for Paddle.com
 #
 # This file is licensed under the AGPLv3
-find . -type f | ( 
+find . \( -type d \( -name venv -o -name .git \) -prune -false \) -o -type f | ( 
     failcount=0
     # substatus=0
     while read -r file
