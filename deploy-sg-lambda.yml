@@ -20,37 +20,19 @@
     lambda_name: cf-security-group-update
     lambda_function_name: cf-security-group-update-test
     lambda_handler: "{{lambda_name}}.lambda_handler"
-    security_group_name: cloudflare_lambda_test_sg
+    security_group_name: cloudflare_lambda_demo_sg
     output_dir: ~/ansible_testing
 
   tasks:
     - name: set up AWS credentials
       block:
         - set_fact:
-            aws_connection_info: &aws_connection_info
-              aws_region: '{{ aws_region }}'
-              aws_access_key: '{{ aws_access_key }}'
-              aws_secret_key: '{{ aws_secret_key }}'
-              security_token: '{{ security_token }}'
+          aws_connection_info: &aws_connection_info
+            aws_region: '{{ aws_region }}'
+            aws_access_key: '{{ aws_access_key }}'
+            aws_secret_key: '{{ aws_secret_key }}'
+            security_token: '{{ security_token }}'
           no_log: true
-
-    - tags:
-        - given that I have a security group which is empty
-      block:
-
-        - name: delete security group if present
-          ec2_group:
-            name: "{{ security_group_name }}"
-            state: absent
-            <<: *aws_connection_info
-
-        - name: create security group recording id
-          ec2_group:
-            name: "{{ security_group_name }}"
-            state: present
-            description: security group for testing cloudflare ip lambda
-            <<: *aws_connection_info
-          register: group_create
 
     - tags:
         - given that we have a lambda installed
@@ -97,6 +79,14 @@
         #     seconds: 10
         #   when: iam_role.changed
 
+        - name: ensure security group is present
+          ec2_group:
+            name: "{{ security_group_name }}"
+            state: present
+            description: security group for testing cloudflare ip lambda
+            <<: *aws_connection_info
+          register: group_create
+
         - name: test state=present - upload the lambda
           lambda:
             name: "{{lambda_function_name}}"
@@ -110,59 +100,3 @@
               SECURITY_GROUP_ID: "{{ group_create.group_id }}"
             <<: *aws_connection_info
           register: lambda_result
-
-    - tags:
-        - when I trigger my IP address updater lambda
-      block:
-
-        - name: test lambda works
-          execute_lambda:
-            name: "{{lambda_function_name}}"
-            <<: *aws_connection_info
-          register: result
-
-    # Then the cloudflare addresses should be included in the security group
-
-
-    - tags:
-        - then that security group should be updated with cloudflare IP addresses
-      block:
-        - ec2_group_facts:
-            filters:
-              group-name: "{{ security_group_name }}"
-            <<: *aws_connection_info
-          register: group_res
-
-        - name: check that some cloudflare addresses are there and we have the right group
-          assert:
-            that:
-              - "'108.162.192.0/18' in {{group_res | to_json | quote}}"
-              - "'{{ security_group_name }}' in {{group_res | to_json | quote}}"
-            msg: "failed to create security group"
-
-            # FIXME: this doesn't work because boto3 fails to remove all of a protocol
-            # need to check with AWS what the actual command should be.
-
-            # - name: check that we clean out wrong rules
-            #   assert:
-            #     that:
-            #       - "'0.0.0.0' not in {{group_res | to_json | quote}}"
-            #     msg: "failed to clean up security group"
-
-    - always:
-
-        # ============================================================
-
-        - name: destroy lambda for test cleanup if created
-          lambda:
-            name: "{{lambda_function_name}}"
-            <<: *aws_connection_info
-            state: absent
-          register: result
-          ignore_errors: true
-
-        - name: delete security group if present
-          ec2_group:
-            name: "{{ security_group_name }}"
-            <<: *aws_connection_info
-            state: absent

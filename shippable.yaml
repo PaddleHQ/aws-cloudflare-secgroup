@@ -23,6 +23,7 @@ build:
     - "export AWS_SECRET_ACCESS_KEY=$(shipctl get_integration_resource_field aws_mdd secretKey)"
     - "cp aws_credentials.shippable_template aws_credentials.yml"
     - "ansible-playbook -vvvvv test-system.yml -i localhost,"
+    - "behave"
 
 resources:
   - name: aws_mdd
