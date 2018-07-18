@@ -13,7 +13,7 @@ branches:
 build:
   ci:
     - sudo apt-get install python3-pip shellcheck ansible
-    - pip3 install -r ci-requirements.txt
+    - pip3 install -r dev-requirements.txt
     - "./lint-all-the-files.sh"
     - "shipctl get_integration_resource_field aws_mdd accessKey"
     - "shipctl get_resource_env aws_mdd DEMO"
