@@ -25,6 +25,9 @@ build:
     - "ansible-playbook -vvvvv test-system.yml -i localhost,"
     - "behave"
 
+after_success:
+ - ./push_on_success.sh
+
 resources:
   - name: aws_mdd
     type: integration
