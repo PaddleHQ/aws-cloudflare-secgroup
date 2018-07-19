@@ -15,7 +15,7 @@ if [ "$BRANCH" == "devel" ] && [ "$PULL_REQUEST" == false ]; then
 fi;
 
 if [ "$BRANCH" == "test_devel" ] && [ "$PULL_REQUEST" == false ]; then
-  git checkout -B tested
+  git checkout -B test_tested
   git push -u origin test_tested
 fi;
 
