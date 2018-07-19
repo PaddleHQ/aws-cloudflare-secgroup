@@ -9,6 +9,7 @@ branches:
     - unreviewed
     - unreviewed2
     - devel
+    - test_devel
 
 build:
   ci:
