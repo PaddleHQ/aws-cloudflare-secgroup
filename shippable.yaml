@@ -9,6 +9,7 @@ branches:
     - unreviewed
     - unreviewed2
     - devel
+    - test_devel
 
 build:
   ci:
@@ -26,7 +27,7 @@ build:
     - "behave"
 
 after_success:
- - ./push_on_success.sh
+  - ./push_on_success.sh
 
 resources:
   - name: aws_mdd
