@@ -7,6 +7,10 @@
 #   something) rerun an old commit.
 #
 
+git config user.name "Shippable Bot For Paddle"
+git config user.email "mdlr@paddle.com"
+
+git remote -v show
 
 
 if [ "$BRANCH" == "devel" ] && [ "$PULL_REQUEST" == false ]; then
