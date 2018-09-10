@@ -2,3 +2,4 @@ aws_credentials.yml
 *.retry
 *~
 *venv
+aws_credentials*

@@ -14,24 +14,34 @@
 
 - hosts: localhost
   vars_files:
-    - aws_credentials.yml
+    - "aws_credentials_{{aws_account_name}}.yml"
   vars:
     ansible_connection: local
     lambda_name: cf-security-group-update
-    lambda_function_name: cf-security-group-update-test
+    lambda_function_name: cf-security-group-update
     lambda_handler: "{{lambda_name}}.lambda_handler"
     security_group_name: cloudflare_lambda_demo_sg
     output_dir: ~/ansible_testing
+    lambda_role: "arn:aws:iam::{{aws_account}}:role/service-role/basicLambdaRole"
 
   tasks:
+    - name: Get the current caller identity facts and set variables
+      block:
+        - aws_caller_facts:
+          register: caller_facts
+
+        - set_fact:
+            aws_account: "{{caller_facts.account}}"
+
+
     - name: set up AWS credentials
       block:
         - set_fact:
-          aws_connection_info: &aws_connection_info
-            aws_region: '{{ aws_region }}'
-            aws_access_key: '{{ aws_access_key }}'
-            aws_secret_key: '{{ aws_secret_key }}'
-            security_token: '{{ security_token }}'
+            aws_connection_info: &aws_connection_info
+              aws_region: '{{ aws_region }}'
+              aws_access_key: '{{ aws_access_key }}'
+              aws_secret_key: '{{ aws_secret_key }}'
+              security_token: '{{ security_token }}'
           no_log: true
 
     - tags:
@@ -92,7 +102,7 @@
             name: "{{lambda_function_name}}"
             runtime: "python3.6"
             handler: "{{lambda_handler}}"
-            role: "arn:aws:iam::455225740156:role/service-role/basicLambdaRole"
+            role: "{{lambda_role}}"
             zip_file: "{{zip_res.dest}}"
             timeout: 90
             environment_variables:

@@ -1,0 +1,60 @@
+---
+#
+#  This adds IAM requirements to allow the deployment script to be
+#  run.  Since it creates and modifies IAM users roles and policies it
+#  needs to be run with full IAM account manager privilages.
+#
+
+- hosts: localhost
+  vars_files:
+    - "aws_credentials_{{aws_account_name}}_iam_admin.yml"
+  vars:
+    ansible_connection: local
+    role: "arn:aws:iam::{{aws_account}}:role/service-role/basicLambdaRole"
+
+  tasks:
+    - name: create IAM definitions
+      block:
+        - iam_user:
+            name: ansible_deploy_cf
+            # FullAccess should be eliminated but AWS doesn't have any
+            # standard limited policies that match so we will need to
+            # create our own policies for that.  Do it later.
+            managed_policy:
+              - arn:aws:iam::aws:policy/AWSLambdaFullAccess
+              - arn:aws:iam::aws:policy/IAMFullAccess
+              - arn:aws:iam::aws:policy/AmazonEC2FullAccess
+            state: present
+
+        - iam_role:
+            name: cloudflare_sg_lambda
+            managed_policy:
+              - arn:aws:iam::aws:policy/AmazonEC2FullAccess
+              - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+            state: present
+            assume_role_policy_document: "{{ lookup('file','assume-lambda-role-policy.json') }}"
+
+    - name: set up access keys
+      block:
+        - shell: |
+            for i in $(aws iam list-access-keys  --user-name=ansible_deploy_cf | grep AccessKeyId | sed -e 's/",//' -e 's/.*"//' ) 
+            do
+              aws iam delete-access-key  --user-name=ansible_deploy_cf --access-key-id=$i
+            done
+
+        - command: aws iam create-access-key --user-name=ansible_deploy_cf
+          register: cred_create_result
+
+        - copy:
+            content: |
+              ---
+              aws_region: us-east-2
+              aws_access_key: {{(cred_create_result.stdout | from_json).AccessKey.AccessKeyId}}
+              aws_secret_key: {{(cred_create_result.stdout | from_json).AccessKey.SecretAccessKey}}
+              security_token:
+            dest: /tmp/id_output
+
+        - fetch:
+            src: /tmp/id_output
+            dest: "aws_credentials_{{aws_account_name}}.yml"
+            flat: yes
