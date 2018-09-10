@@ -17,9 +17,6 @@ build:
     - pip3 install -r dev-requirements.txt
     - "./lint-all-the-files.sh"
     - "shipctl get_integration_resource_field aws_mdd accessKey"
-    - "shipctl get_resource_env aws_mdd DEMO"
-    - "echo success"
-    - "true"
     - "export AWS_ACCESS_KEY_ID=$(shipctl get_integration_resource_field aws_mdd accessKey)"
     - "export AWS_SECRET_ACCESS_KEY=$(shipctl get_integration_resource_field aws_mdd secretKey)"
     - "cp aws_credentials.shippable_template aws_credentials.yml"
