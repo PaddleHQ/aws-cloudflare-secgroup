@@ -110,3 +110,11 @@
               SECURITY_GROUP_ID: "{{ group_create.group_id }}"
             <<: *aws_connection_info
           register: lambda_result
+
+        - cloudwatchevent_rule:
+            name: CloudFlareSecurityGroupUpdate
+            schedule_expression: "rate(29 minutes)"
+            description: Trigger lambda to update cloudflare security groups.
+            targets:
+              - id: MyTargetId
+                arn: "{{lambda_result.configuration.function_arn}}"
