@@ -23,6 +23,7 @@
     security_group_name: cloudflare_lambda_demo_sg
     output_dir: ~/ansible_testing
     lambda_role: "arn:aws:iam::{{aws_account}}:role/cloudflare_sg_lambda"
+    vpc_id: null
 #    lambda_role: "arn:aws:iam::{{aws_account}}:role/service-role/cloudflare_sg_lambda"
 
   tasks:
@@ -96,6 +97,7 @@
             name: "{{ security_group_name }}"
             state: present
             description: security group for testing cloudflare ip lambda
+            vpc_id: "{{vpc_id}}"
             <<: *aws_connection_info
           register: group_create
 
@@ -113,7 +115,8 @@
               SECURITY_GROUP_ID: "{{ group_create.group_id }}"
           register: lambda_result
 
-        - cloudwatchevent_rule:
+        - name: create repeating event trigger
+          cloudwatchevent_rule:
             name: CloudFlareSecurityGroupUpdate
             schedule_expression: "rate(29 minutes)"
             description: Trigger lambda to update cloudflare security groups.
@@ -122,14 +125,13 @@
               - id: MyTargetId
                 arn: "{{lambda_result.configuration.function_arn}}"
 
-        - name: Lambda S3 event notification
+        - name: allow event trigger to invoke lambda
           lambda_policy:
             state: "present"
             function_name: "{{lambda_function_name}}"
             statement_id: timed_lambda_invoke
             action: lambda:InvokeFunction
             principal: events.amazonaws.com
-            source_arn: 
-#            source_account: 123456789012
+            <<: *aws_connection_info
 
 
