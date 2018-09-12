@@ -20,7 +20,7 @@
     lambda_name: cf-security-group-update
     lambda_function_name: cf-security-group-update
     lambda_handler: "{{lambda_name}}.lambda_handler"
-    security_group_name: cloudflare_lambda_demo_sg
+    security_group_name: cloudflare_lambda_sg
     output_dir: ~/ansible_testing
     lambda_role: "arn:aws:iam::{{aws_account}}:role/cloudflare_sg_lambda"
     vpc_id: null
@@ -96,7 +96,7 @@
           ec2_group:
             name: "{{ security_group_name }}"
             state: present
-            description: security group for testing cloudflare ip lambda
+            description: security group allowing incoming traffic from cloudflare
             vpc_id: "{{vpc_id}}"
             <<: *aws_connection_info
           register: group_create
