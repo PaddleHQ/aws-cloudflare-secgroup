@@ -22,18 +22,10 @@
     lambda_handler: "{{lambda_name}}.lambda_handler"
     security_group_name: cloudflare_lambda_demo_sg
     output_dir: ~/ansible_testing
-    lambda_role: "arn:aws:iam::{{aws_account}}:role/service-role/basicLambdaRole"
+    lambda_role: "arn:aws:iam::{{aws_account}}:role/cloudflare_sg_lambda"
+#    lambda_role: "arn:aws:iam::{{aws_account}}:role/service-role/cloudflare_sg_lambda"
 
   tasks:
-    - name: Get the current caller identity facts and set variables
-      block:
-        - aws_caller_facts:
-          register: caller_facts
-
-        - set_fact:
-            aws_account: "{{caller_facts.account}}"
-
-
     - name: set up AWS credentials
       block:
         - set_fact:
@@ -43,6 +35,16 @@
               aws_secret_key: '{{ aws_secret_key }}'
               security_token: '{{ security_token }}'
           no_log: true
+
+    - name: Get the current caller identity facts and set variables
+      block:
+        - aws_caller_facts:
+            <<: *aws_connection_info
+          register: caller_facts
+
+        - set_fact:
+            aws_account: "{{caller_facts.account}}"
+
 
     - tags:
         - given that we have a lambda installed
@@ -105,16 +107,29 @@
             role: "{{lambda_role}}"
             zip_file: "{{zip_res.dest}}"
             timeout: 90
+            <<: *aws_connection_info
             environment_variables:
               PORTS_LIST: 80,443
               SECURITY_GROUP_ID: "{{ group_create.group_id }}"
-            <<: *aws_connection_info
           register: lambda_result
 
         - cloudwatchevent_rule:
             name: CloudFlareSecurityGroupUpdate
             schedule_expression: "rate(29 minutes)"
             description: Trigger lambda to update cloudflare security groups.
+            <<: *aws_connection_info
             targets:
               - id: MyTargetId
                 arn: "{{lambda_result.configuration.function_arn}}"
+
+        - name: Lambda S3 event notification
+          lambda_policy:
+            state: "present"
+            function_name: "{{lambda_function_name}}"
+            statement_id: timed_lambda_invoke
+            action: lambda:InvokeFunction
+            principal: events.amazonaws.com
+            source_arn: 
+#            source_account: 123456789012
+
+
