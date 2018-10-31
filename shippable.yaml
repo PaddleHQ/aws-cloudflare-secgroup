@@ -13,10 +13,11 @@ branches:
 
 build:
   ci:
-    - sudo add-apt-repository ppa:ansible/ansible
+    - sudo add-apt-repository ppa:ansible/ansible-2.6 -y
     - sudo apt-get update
     - sudo apt-get install python3-pip shellcheck ansible
     - pip3 install -r dev-requirements.txt
+    - sudo pip2 install -r dev-requirements.txt
     - "./lint-all-the-files.sh"
     - "shipctl get_integration_resource_field aws_mdd accessKey"
     - "export AWS_ACCESS_KEY_ID=$(shipctl get_integration_resource_field aws_mdd accessKey)"
