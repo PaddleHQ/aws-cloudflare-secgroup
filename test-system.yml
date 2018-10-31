@@ -62,9 +62,6 @@
             <<: *aws_connection_info
           register: result
 
-    # Then the cloudflare addresses should be included in the security group
-
-
     - tags:
         - then that security group should be updated with cloudflare IP addresses
       block:
@@ -89,4 +86,3 @@
             #     that:
             #       - "'0.0.0.0' not in {{group_res | to_json | quote}}"
             #     msg: "failed to clean up security group"
-
