@@ -15,6 +15,7 @@ build:
   ci:
     - sudo add-apt-repository ppa:ansible/ansible-2.6 -y
     - sudo apt-get update
+    - sudo rm -rf /usr/local/lib/python2.7/dist-packages/ansible
     - sudo apt-get install python3-pip shellcheck ansible
     - pip3 install -r dev-requirements.txt
     - sudo pip2 install -r dev-requirements.txt
