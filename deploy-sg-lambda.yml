@@ -24,7 +24,7 @@
     output_dir: ~/ansible_testing
     lambda_role: "arn:aws:iam::{{aws_account}}:role/cloudflare_sg_lambda"
     vpc_id: null
-#    lambda_role: "arn:aws:iam::{{aws_account}}:role/service-role/cloudflare_sg_lambda"
+    #    lambda_role: "arn:aws:iam::{{aws_account}}:role/service-role/cloudflare_sg_lambda"
 
   tasks:
     - name: set up AWS credentials
@@ -133,5 +133,3 @@
             action: lambda:InvokeFunction
             principal: events.amazonaws.com
             <<: *aws_connection_info
-
-

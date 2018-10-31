@@ -26,7 +26,7 @@
     - name: create IAM definitions
       block:
         - iam_user:
-            name: {{ deploy_user }}
+            name: {{deploy_user}}
             # FullAccess should be eliminated but AWS doesn't have any
             # standard limited policies that match so we will need to
             # create our own policies for that.  Do it later.
@@ -49,22 +49,23 @@
     - name: set up access keys
       block:
         - shell: |
-            for i in $(aws iam list-access-keys  --user-name={{ deploy_user }} | grep AccessKeyId | sed -e 's/",//' -e 's/.*"//' ) 
+            for i in $(aws iam list-access-keys  --user-name={{ deploy_user }} |
+                       grep AccessKeyId | sed -e 's/",//' -e 's/.*"//' )
             do
               aws iam delete-access-key  --user-name={{ deploy_user }} --access-key-id=$i
             done
           environment:
-              AWS_ACCESS_KEY_ID: '{{aws_access_key}}'
-              AWS_SECRET_ACCESS_KEY: '{{aws_secret_key}}'
-              AWS_DEFAULT_REGION: '{{aws_region}}'
-    #              AWS_SESSION_TOKEN: '{{security_token}}'
+            AWS_ACCESS_KEY_ID: '{{aws_access_key}}'
+            AWS_SECRET_ACCESS_KEY: '{{aws_secret_key}}'
+            AWS_DEFAULT_REGION: '{{aws_region}}'
+            # AWS_SESSION_TOKEN: '{{security_token}}'
 
         - command: "aws iam create-access-key --user-name={{ deploy_user }}"
           environment:
-              AWS_ACCESS_KEY_ID: '{{aws_access_key}}'
-              AWS_SECRET_ACCESS_KEY: '{{aws_secret_key}}'
-              AWS_DEFAULT_REGION: '{{aws_region}}'
-    #              AWS_SESSION_TOKEN: '{{security_token}}'
+            AWS_ACCESS_KEY_ID: '{{aws_access_key}}'
+            AWS_SECRET_ACCESS_KEY: '{{aws_secret_key}}'
+            AWS_DEFAULT_REGION: '{{aws_region}}'
+            # AWS_SESSION_TOKEN: '{{security_token}}'
           register: cred_create_result
 
         - copy:
@@ -79,4 +80,4 @@
         - fetch:
             src: /tmp/id_output
             dest: "aws_credentials_{{aws_account_name}}.yml"
-            flat: yes
+            flat: true
