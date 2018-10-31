@@ -28,6 +28,8 @@
 
   tasks:
     - name: set up AWS credentials
+      tags:
+        - always
       block:
         - set_fact:
             aws_connection_info: &aws_connection_info
@@ -38,6 +40,8 @@
           no_log: true
 
     - name: Get the current caller identity facts and set variables
+      tags:
+        - always
       block:
         - aws_caller_facts:
             <<: *aws_connection_info

@@ -22,6 +22,8 @@ build:
     - "export AWS_ACCESS_KEY_ID=$(shipctl get_integration_resource_field aws_mdd accessKey)"
     - "export AWS_SECRET_ACCESS_KEY=$(shipctl get_integration_resource_field aws_mdd secretKey)"
     - "cp aws_credentials.shippable_template aws_credentials.yml"
+    - "ansible-playbook --version"
+    - "ansible-playbook -vvvvv deploy-sg-lambda.yml -i localhost,"
     - "ansible-playbook -vvvvv test-system.yml -i localhost,"
     - "behave"
 
