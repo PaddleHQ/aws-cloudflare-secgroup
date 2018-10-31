@@ -13,8 +13,6 @@
 
 
 - hosts: localhost
-  vars_files:
-    - "aws_credentials_{{aws_account_name}}.yml"
   vars:
     aws_account_name: build
     ansible_connection: local
@@ -26,6 +24,8 @@
     lambda_role: "arn:aws:iam::{{aws_account}}:role/cloudflare_sg_lambda"
     vpc_id: null
     #    lambda_role: "arn:aws:iam::{{aws_account}}:role/service-role/cloudflare_sg_lambda"
+  vars_files:
+    - "aws_credentials_{{aws_account_name}}.yml"
 
   tasks:
     - name: set up AWS credentials
