@@ -92,7 +92,7 @@
             name: "{{lambda_function_name}}"
             runtime: "python3.6"
             handler: "{{lambda_handler}}"
-            role: "arn:aws:iam::455225740156:role/service-role/basicLambdaRole"
+            role: "arn:aws:iam::165976801113:role/cloudflare_sg_lambda"
             zip_file: "{{zip_res.dest}}"
             timeout: 90
             environment_variables:

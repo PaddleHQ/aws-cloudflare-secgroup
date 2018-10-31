@@ -1,0 +1,41 @@
+---
+sudo: required
+
+language: python
+python:
+  - 3.6
+matrix:
+  include:
+    - python: 3.7
+      dist: xenial
+      sudo: true
+
+branches:
+  only:
+    - unreviewed
+    - unreviewed2
+    - devel
+    - test_devel
+
+env:
+  global:
+    - secure: "l/aH3AQILdNnq856fsaUAsrVhhOHoPMdTns9u4f3lLvXVm8+wa4eMrEpWAJDzSjUEbfKUNtKooxd2+LHy5SEO8PMg/zz4zQ2JX7HOAuTCc0XwWvAk993mbTY5+yQFB03zF3TzxC5AwWGDqApCESf4bIvzHJYmBOwmN8gNARDVt1Nt2MOOvVlgPl4p8w/9aarc9PuFWJZVW1M55M4h0rpyx4fOYJj4hGCzSo1zOVIg2vIDbTmnz5VGubi+IFzYvelnqOUuxta/4srION1DaTzyoANMFKEFBkZgGTX9OJ27ivd72alaL37WzwW6GFP95Dv8nbqrDqiitpX0XGzDwcAp+NqUVmUK6XMOie2KKGwyeWHz5ECikKplnScxeF/+M+nUutpRqjv5Qeujx812wWGuv6fzuYpopvrx8+xyT0CUbI+i44XGA7Y3ITTokl56TkZ0dlAElkerAQ3zgryfrHB7TnLAodsCRXX52WO8ISQ2xjpA+KquG0uxpqo9Cu48wqoM5gCwidO3sOfOOzZV2aTxVJYHVwFDfGhrcH+qMbf2sUSeVNfqZC45xKadWozP64+bGfnOqLY9HwMGbRvj1UTkYKwZlzhPaktfQv+z+TStaPdRQdxSptYfkNT1ylvjOnuObo5+8PG/T+lITNZ/y9BR1545bAToQ5FAFHfH7OURj8="
+    - secure: "YPqPin0hhTaXB0KChal7wxwy1kkrM6IIJTjuPXYbVYNrPfKpVumKBmIRwn+irLKY3AU4O07b+ifmjsi5jwg68Ua5nAnJruzZfPoWqyg50x7wa2K4mGPbWQCR7vKeTiLh/BDibXMWXwEXCDE+GEgPLu58zAQy++IrteH9uYrQE0mfFKlvsEHxPvpi83SXTYrIpj2vMOxTravTsvDLgibY2DrcCwZta5qh+TnwgVmP/tQFM/A8dEW4Y+chW98RPUwUEqpBcTxPQ6X26ZzqrP6UqkqtKc8z9ojVq+IC4p2ixAj8xUg56YVb6t182xXdmHGc3bHlBMexNHUQCAcrD8TbE0xTTGM7Z3utPtGsVlJPNe7T/vW8LC9OU0giLnsOUcCmY+luTUd0bfg5nmD1pXL08YFP3feDDNGMHKesI1lZYegYsbT9sQTfYWdohRFvmzWSNk30fs0//T1uPWmUxY58k3b7N9OQqruXN/KLtKO/xiZ2VVbSyvmjR/DXdDlNdGCsaJ+3qPRsCCqJTn4u6go1atbFw3HHrzV4Qp5QcQ1A/voGVvQ7Kv1ruiK2WgNXexsJJJj4EBRdlpN2GN1BNdu13sLo+cvrfXaaYBY+ByfBCeMC2+0BdQzrAB0A6BPqJsv+qdpwcXoUIMncquRRbCXZ/nMF3i/kPQCtnof0dfaXLW0="
+
+before_script:
+  - sudo add-apt-repository ppa:ansible/ansible-2.6 -y
+  - sudo apt-get update
+  - sudo apt-get install python3-pip shellcheck ansible
+  - pip3 install -r dev-requirements.txt
+  - sudo pip2 install -r dev-requirements.txt
+  - "./lint-all-the-files.sh"
+  - "echo success"
+  - "true"
+
+script:
+  - "cp aws_credentials.shippable_template aws_credentials.yml"
+  - "ansible-playbook -vvvvv test-system.yml -i localhost,"
+  - "behave"
+
+after_script:
+  - ./push_on_success.sh

@@ -3,3 +3,4 @@ PyHamcrest
 boto3
 flake8
 yamllint
+botocore
