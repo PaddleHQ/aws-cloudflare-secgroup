@@ -16,6 +16,7 @@
   vars_files:
     - "aws_credentials_{{aws_account_name}}.yml"
   vars:
+    aws_account: build
     ansible_connection: local
     lambda_name: cf-security-group-update
     lambda_function_name: cf-security-group-update
