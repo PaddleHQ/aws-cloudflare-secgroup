@@ -1,0 +1,125 @@
+---
+- name: set up AWS credentials
+  tags:
+    - always
+  block:
+    - set_fact:
+        aws_connection_info: &aws_connection_info
+          aws_region: '{{ aws_region }}'
+          aws_access_key: '{{ aws_access_key }}'
+          aws_secret_key: '{{ aws_secret_key }}'
+          security_token: '{{ security_token }}'
+      no_log: true
+
+
+- name: get VPC information if it hasn't been set
+  when: vpc_id is undefined
+  tags:
+    - always
+  block:
+
+    - ec2_vpc_net_facts:
+      register: vpc_facts
+      when: vpc_id is undefined
+
+    - set_fact:
+        vpc_id: '{{ ( vpc_facts.vpcs | selectattr("is_default") | first() )["vpc_id"] }}'
+
+- name: Get the current caller identity facts and set variables
+  tags:
+    - always
+  block:
+    - aws_caller_facts:
+        <<: *aws_connection_info
+      register: caller_facts
+
+    - set_fact:
+        aws_account: "{{caller_facts.account}}"
+
+
+- tags:
+    - given that we have a lambda installed
+  block:
+
+    - name: ensure that output dir exists
+      file:
+        path: "{{output_dir}}"
+        state: directory
+        mode: 0775
+
+    # ============================================================
+    # direct zip file upload
+    - name: move lambda into place for archive module
+      copy:
+        src: "{{lambda_name}}.py"
+        dest: "{{output_dir}}/{{lambda_name}}.py"
+
+    - name: bundle lambda into a zip
+      archive:
+        format: zip
+        path: "{{output_dir}}/{{lambda_name}}.py"
+        dest: "{{output_dir}}/{{lambda_name}}.zip"
+      register: zip_res
+
+    # This should exist, but there's no expectation that the test user should be able to
+    # create/update this role, merely validate that it's there.
+    # Use ansible -m iam_role -a 'name=ansible_lambda_role
+    # assume_role_policy_document={{ lookup("file",
+    # "test/integration/targets/lambda_policy/files/minimal_trust_policy.json", \
+    #        convert_data=False) }}
+    # ' -vvv localhost
+    # to create this through more privileged credentials before running this test suite.
+    # - name: create minimal lambda role
+    #   iam_role:
+    #     name: ansible_lambda_role
+    #     assume_role_policy_document: "{{ lookup('file', 'minimal_trust_policy.json', convert_data=False) }}"
+    #     create_instance_profile: no
+    #     <<: *aws_connection_info
+    #   register: iam_role
+
+    # - name: wait 10 seconds for role to become available
+    #   pause:
+    #     seconds: 10
+    #   when: iam_role.changed
+
+    - name: ensure security group is present
+      ec2_group:
+        name: "{{ security_group_name }}"
+        state: present
+        description: security group allowing incoming traffic from cloudflare
+        vpc_id: "{{vpc_id}}"
+        <<: *aws_connection_info
+      register: group_create
+
+    - name: test state=present - upload the lambda
+      lambda:
+        name: "{{lambda_function_name}}"
+        runtime: "python3.6"
+        handler: "{{lambda_handler}}"
+        role: "{{lambda_role}}"
+        zip_file: "{{zip_res.dest}}"
+        timeout: 90
+        <<: *aws_connection_info
+        environment_variables:
+          PORTS_LIST: 80,443
+          SECURITY_GROUP_ID: "{{ group_create.group_id }}"
+      register: lambda_result
+
+    - name: create repeating event trigger
+      cloudwatchevent_rule:
+        name: CloudFlareSecurityGroupUpdate
+        schedule_expression: "rate(29 minutes)"
+        description: Trigger lambda to update cloudflare security groups.
+        <<: *aws_connection_info
+        targets:
+          - id: MyTargetId
+            arn: "{{lambda_result.configuration.function_arn}}"
+
+    - name: allow event trigger to invoke lambda
+      lambda_policy:
+        state: "present"
+        function_name: "{{lambda_function_name}}"
+        statement_id: timed_lambda_invoke
+        action: lambda:InvokeFunction
+        principal: events.amazonaws.com
+        <<: *aws_connection_info
