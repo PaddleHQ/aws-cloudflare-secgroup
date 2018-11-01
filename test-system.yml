@@ -19,12 +19,15 @@
     lambda_handler: "{{lambda_name}}.lambda_handler"
     security_group_name: cloudflare_lambda_test_sg
     output_dir: ~/ansible_testing
-    vpc_id: null
+    lambda_role: "arn:aws:iam::{{aws_account}}:role/cloudflare_sg_lambda"
   vars_files:
     - aws_credentials.yml
 
-  tasks:
+  pre_tasks:
+    # we duplicate this which is also in the role so the variables are visible in the test
     - name: set up AWS credentials
+      tags:
+        - always
       block:
         - set_fact:
             aws_connection_info: &aws_connection_info
@@ -44,20 +47,8 @@
             state: absent
             <<: *aws_connection_info
 
-- name: given that we have a lambda installed
-  import_playbook: deploy-sg-lambda.yml
-
-
-- hosts: localhost
-  vars_files:
-    - aws_credentials.yml
-  vars:
-    ansible_connection: local
-    lambda_name: cf-security-group-update
-    lambda_function_name: cf-security-group-update-test
-    lambda_handler: "{{lambda_name}}.lambda_handler"
-    security_group_name: cloudflare_lambda_test_sg
-    output_dir: ~/ansible_testing
+  roles:
+    - sg_lambda
 
   tasks:
     - name: ensure security group is present - actually just get data
