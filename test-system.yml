@@ -11,10 +11,7 @@
 #  Further work on this done as paid work by Michael De La Rue for paddle.com.
 #
 
-
 - hosts: localhost
-  vars_files:
-    - aws_credentials.yml
   vars:
     ansible_connection: local
     lambda_name: cf-security-group-update
@@ -22,6 +19,9 @@
     lambda_handler: "{{lambda_name}}.lambda_handler"
     security_group_name: cloudflare_lambda_test_sg
     output_dir: ~/ansible_testing
+    vpc_id: null
+  vars_files:
+    - aws_credentials.yml
 
   tasks:
     - name: set up AWS credentials
@@ -44,13 +44,30 @@
             state: absent
             <<: *aws_connection_info
 
-        - name: create security group recording id
-          ec2_group:
-            name: "{{ security_group_name }}"
-            state: present
-            description: security group for testing cloudflare ip lambda
-            <<: *aws_connection_info
-          register: group_create
+- name: given that we have a lambda installed
+  import_playbook: deploy-sg-lambda.yml
+
+
+- hosts: localhost
+  vars_files:
+    - aws_credentials.yml
+  vars:
+    ansible_connection: local
+    lambda_name: cf-security-group-update
+    lambda_function_name: cf-security-group-update-test
+    lambda_handler: "{{lambda_name}}.lambda_handler"
+    security_group_name: cloudflare_lambda_test_sg
+    output_dir: ~/ansible_testing
+
+  tasks:
+    - name: ensure security group is present - actually just get data
+      ec2_group:
+        name: "{{ security_group_name }}"
+        state: present
+        description: security group allowing incoming traffic from cloudflare
+        vpc_id: "{{vpc_id}}"
+        <<: *aws_connection_info
+      register: group_create
 
     - tags:
         - when I trigger my IP address updater lambda
