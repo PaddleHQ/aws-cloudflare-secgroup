@@ -26,7 +26,6 @@ build:
     - "cp aws_credentials.shippable_template aws_credentials.yml"
     - "cp aws_credentials.shippable_template aws_credentials_build.yml"
     - "ansible-playbook --version"
-    - "ansible-playbook -vvvvv deploy-sg-lambda.yml -i localhost,"
     - "ansible-playbook -vvvvv test-system.yml -i localhost,"
     - "behave"
 
