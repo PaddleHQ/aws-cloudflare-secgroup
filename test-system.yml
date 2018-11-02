@@ -36,6 +36,15 @@
               aws_secret_key: '{{ aws_secret_key }}'
               security_token: '{{ security_token }}'
           no_log: true
+    - tags:
+        - given that I have a security group which is empty
+      block:
+        - name: delete security group if present
+          ec2_group:
+            name: "{{ security_group_name }}"
+            state: absent
+            <<: *aws_connection_info
+
 
   roles:
     - role: sg_lambda
@@ -46,12 +55,6 @@
     - tags:
         - given that I have a security group which is empty
       block:
-        - name: delete security group if present
-          ec2_group:
-            name: "{{ security_group_name }}"
-            state: absent
-            <<: *aws_connection_info
-
         - name: recreate group - now completely empty
           ec2_group:
             name: "{{ security_group_name }}"
