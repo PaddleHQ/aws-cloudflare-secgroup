@@ -12,10 +12,8 @@ matrix:
 
 branches:
   only:
-    - unreviewed
-    - unreviewed2
-    - devel
-    - test_devel
+    - /unreviewed.*/
+    - /devel.*/
 
 env:
   global:

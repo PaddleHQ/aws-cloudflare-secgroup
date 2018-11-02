@@ -6,10 +6,9 @@ python:
 
 branches:
   only:
-    - unreviewed
+    - unreviewed*
     - unreviewed2
-    - devel
-    - test_devel
+    - dev*
 
 build:
   ci:
