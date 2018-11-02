@@ -37,9 +37,7 @@
         aws_account: "{{caller_facts.account}}"
 
 
-- tags:
-    - given that we have a lambda installed
-  block:
+- block:
 
     - name: ensure that output dir exists
       file:

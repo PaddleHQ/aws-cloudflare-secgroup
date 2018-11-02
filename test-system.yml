@@ -37,28 +37,29 @@
               security_token: '{{ security_token }}'
           no_log: true
 
+  roles:
+    - role: sg_lambda
+      tags:
+        - given that I have deployed my updater to update that security group
+
+  tasks:
     - tags:
         - given that I have a security group which is empty
       block:
-
         - name: delete security group if present
           ec2_group:
             name: "{{ security_group_name }}"
             state: absent
             <<: *aws_connection_info
 
-  roles:
-    - sg_lambda
-
-  tasks:
-    - name: ensure security group is present - actually just get data
-      ec2_group:
-        name: "{{ security_group_name }}"
-        state: present
-        description: security group allowing incoming traffic from cloudflare
-        vpc_id: "{{vpc_id}}"
-        <<: *aws_connection_info
-      register: group_create
+        - name: recreate group - now completely empty
+          ec2_group:
+            name: "{{ security_group_name }}"
+            state: present
+            description: security group allowing incoming traffic from cloudflare
+            vpc_id: "{{vpc_id}}"
+            <<: *aws_connection_info
+          register: group_create
 
     - tags:
         - when I trigger my IP address updater lambda
