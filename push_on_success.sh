@@ -7,15 +7,14 @@
 #   something) rerun an old commit.
 #
 
-git config user.name "Travis Bot For Paddle"
+git config user.name "dmonteiro-paddle"
 git config user.email "dmonteiro@paddle.com"
 
-GIT_SSH_COMMAND="ssh -i dev_key -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no" git remote add pushable git@github.com:PaddleHQ/aws-cloudflare-secgroup.git 
+GIT_SSH_COMMAND="ssh -i deploy_key -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no" git remote add pushable git@github.com:PaddleHQ/aws-cloudflare-secgroup.git 
 
 git remote -v show
 
 if [[ "$TRAVIS_BRANCH" =~ "devel" ]] && [ "$TRAVIS_PULL_REQUEST" == false ]; then
   git checkout -B tested
-  GIT_SSH_COMMAND="ssh -i dev_key -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no" git push -u pushable tested
-
+  GIT_SSH_COMMAND="ssh -i deploy_key -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no" git push -u pushable tested
 fi;
