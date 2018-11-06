@@ -31,4 +31,6 @@ script:
   - "behave"
 
 after_script:
+  - openssl aes-256-cbc -K $encrypted_a45cc096e026_key -iv $encrypted_a45cc096e026_iv -in deploy_key.enc -out deploy_key -d
+  - cp deploy_key .ssh/id_rsa
   - ./push_on_success.sh

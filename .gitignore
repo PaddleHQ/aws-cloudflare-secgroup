@@ -4,3 +4,4 @@ aws_credentials.yml
 *venv
 aws_credentials*
 \#*
+deploy_key
