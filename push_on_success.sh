@@ -14,7 +14,7 @@ git remote add pushable git@github.com:PaddleHQ/aws-cloudflare-secgroup.git
 
 git remote -v show
 
-if [[ "$TRAVIS_BRANCH" =~ "devel" ]] && [ "$PULL_REQUEST" == false ]; then
+if [[ "$TRAVIS_BRANCH" =~ "devel" ]] && [ "$TRAVIS_PULL_REQUEST" == false ]; then
   git checkout -B tested
   git push -u pushable tested
 fi;
