@@ -17,4 +17,6 @@ git remote -v show
 if [[ "$TRAVIS_BRANCH" =~ "devel" ]] && [ "$TRAVIS_PULL_REQUEST" == false ]; then
   git checkout -B tested
   git push -u pushable tested
+  GIT_SSH_COMMAND="ssh -i dev_key -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no" git push -u pushable tested
+
 fi;
