@@ -5,3 +5,4 @@ aws_credentials.yml
 aws_credentials*
 \#*
 deploy_key
+.DS_Store

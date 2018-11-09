@@ -7,8 +7,8 @@
 #   something) rerun an old commit.
 #
 
-git config user.name "dmonteiro-paddle"
-git config user.email "dmonteiro@paddle.com"
+git config user.name "GitHub Travis-CI User"
+git config user.email "engineering+travis@paddle.com"
 
 GIT_SSH_COMMAND="ssh -i deploy_key -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no" git remote add pushable git@github.com:PaddleHQ/aws-cloudflare-secgroup.git 
 
