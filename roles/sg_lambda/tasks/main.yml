@@ -99,7 +99,7 @@
         timeout: 90
         <<: *aws_connection_info
         environment_variables:
-          PORTS_LIST: 80,443
+          PORTS_LIST: 80,443,8444
           SECURITY_GROUP_ID: "{{ group_create.group_id }}"
       register: lambda_result
 
