@@ -17,8 +17,8 @@
   tags:
     - always
   block:
-
     - ec2_vpc_net_facts:
+        <<: *aws_connection_info
       register: vpc_facts
       when: vpc_id is undefined
 
